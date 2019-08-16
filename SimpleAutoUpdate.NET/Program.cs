@@ -103,6 +103,11 @@ namespace SimpleAutoUpdate
                         restartNeeded = true;
                     }
                     string updateZipPackage = DownloadPackage(updateInformation.Url);
+                    if (!string.IsNullOrEmpty(updateInformation.Checksum) && !ValidateCheckSum(updateInformation.Checksum,updateZipPackage))
+                    {
+                        reportError("Invalid Checksum");
+                        return;
+                    }
                     Unzip(updateZipPackage, new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Directory.FullName);
                 }
 
@@ -184,17 +189,26 @@ namespace SimpleAutoUpdate
                 return null;
             }
 
-            return new UpdateInformations(releaseVersion, downloadUrl);
+            String checkSum = "";
+            XmlNode sha256 = root.SelectSingleNode("sha256");
+            if(sha256 != null)
+            {
+                checkSum = sha256.InnerText;
+            }
+
+            return new UpdateInformations(releaseVersion, downloadUrl, checkSum);
         }
 
         private class UpdateInformations
         {
             public string Url { get; }
             public Version Version { get; }
-            public UpdateInformations(Version version, String url)
+            public string Checksum { get; }
+            public UpdateInformations(Version version, String url, string checksum)
             {
                 this.Version = version;
                 this.Url = url;
+                this.Checksum = checksum;
             }
 
         }
@@ -226,5 +240,20 @@ namespace SimpleAutoUpdate
                 }
             }
         }
+
+
+        private bool ValidateCheckSum(string refCheckSum, string file)
+        {
+            string checkSum = null;
+            using (System.IO.FileStream fileStream = System.IO.File.OpenRead(file))
+            {
+                using (System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create())
+                {
+                    checkSum = BitConverter.ToString(sha.ComputeHash(fileStream)).Replace("-", "");
+                }
+            }
+            return refCheckSum.ToLowerInvariant().Equals(checkSum.ToLowerInvariant());
+        }
     }
+
 }
