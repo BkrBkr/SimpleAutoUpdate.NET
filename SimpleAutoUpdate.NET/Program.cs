@@ -46,7 +46,7 @@ namespace SimpleAutoUpdate
         {
             try
             {
-
+                Boolean restartNeeded = false;
 
                 System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Ssl3;
 
@@ -100,13 +100,14 @@ namespace SimpleAutoUpdate
                     if (mainProgram != null)
                     {
                         WaitForExit(mainProgram);
+                        restartNeeded = true;
                     }
                     string updateZipPackage = DownloadPackage(updateInformation.Url);
                     Unzip(updateZipPackage, new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Directory.FullName);
                 }
 
 
-                if (mainProgram != null)
+                if (mainProgram != null && restartNeeded)
                 {
                     Process.Start(mainProgram.FullName);
                 }
