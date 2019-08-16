@@ -44,71 +44,78 @@ namespace SimpleAutoUpdate
 
         private void run(string[] args)
         {
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Ssl3;
+            try
+            {
 
-            if (args.Count() < 2)
-            {
-                Console.WriteLine("Usage: SimpleAutoUpdate.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])");
-                Environment.Exit(-2);
-            }
-            string currentVersionString = args[0];
-            if (string.IsNullOrEmpty(currentVersionString))
-            {
-                reportError("Parameter error:no current version");
-                return;
-            }
-            string updateManifestURL = args[1];
-            if (string.IsNullOrEmpty(currentVersionString))
-            {
-                reportError("Parameter error:no update manifest URL");
-                return;
-            }
-            FileInfo mainProgram = null;
-            if (args.Count() > 2)
-            {
-                string pathToMainProgram = args[2];
 
-                if (string.IsNullOrEmpty(pathToMainProgram) || !File.Exists(pathToMainProgram))
+                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Ssl3;
+
+                if (args.Count() < 2)
                 {
-
-                    reportError("Parameter error: invalid path to main program");
+                    Console.WriteLine("Usage: SimpleAutoUpdate.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])");
+                    Environment.Exit(-2);
+                }
+                string currentVersionString = args[0];
+                if (string.IsNullOrEmpty(currentVersionString))
+                {
+                    reportError("Parameter error:no current version");
                     return;
                 }
-                mainProgram = new FileInfo(pathToMainProgram);
+                string updateManifestURL = args[1];
+                if (string.IsNullOrEmpty(currentVersionString))
+                {
+                    reportError("Parameter error:no update manifest URL");
+                    return;
+                }
+                FileInfo mainProgram = null;
+                if (args.Count() > 2)
+                {
+                    string pathToMainProgram = args[2];
+
+                    if (string.IsNullOrEmpty(pathToMainProgram) || !File.Exists(pathToMainProgram))
+                    {
+
+                        reportError("Parameter error: invalid path to main program");
+                        return;
+                    }
+                    mainProgram = new FileInfo(pathToMainProgram);
+                }
+
+
+                Version currentVersion = new Version(currentVersionString);
+                if (currentVersion is null)
+                {
+                    reportError("Input parameter invalid: invalid release version");
+                    return;
+                }
+
+                UpdateInformations updateInformation = GetUpdateInformations(updateManifestURL);
+                if (updateInformation == null)
+                {
+                    reportError("No update informations found");
+                    return;
+                }
+                if (currentVersion < updateInformation.Version)
+                {
+                    if (mainProgram != null)
+                    {
+                        WaitForExit(mainProgram);
+                    }
+                    string updateZipPackage = DownloadPackage(updateInformation.Url);
+                    Unzip(updateZipPackage, new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Directory.FullName);
+                }
+
+
+                if (mainProgram != null)
+                {
+                    Process.Start(mainProgram.FullName);
+                }
             }
-
-
-            if (mainProgram != null)
+            catch (Exception ex)
             {
-                WaitForExit(mainProgram);
+                reportError(ex.Message);
             }
 
-
-
-            Version currentVersion = new Version(currentVersionString);
-            if (currentVersion is null)
-            {
-                reportError("Input parameter invalid: invalid release version");
-                return;
-            }
-
-            UpdateInformations updateInformation = GetUpdateInformations(updateManifestURL);
-            if (updateInformation == null)
-            {
-                reportError("No update informations found");
-                return;
-            }
-            if (currentVersion < updateInformation.Version)
-            {
-                string updateZipPackage = DownloadPackage(updateInformation.Url);
-                Unzip(updateZipPackage, new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Directory.FullName);
-            }
-
-
-            if (mainProgram != null)
-            {
-                Process.Start(mainProgram.FullName);
-            }
         }
 
         private void WaitForExit(FileInfo mainProgram)
