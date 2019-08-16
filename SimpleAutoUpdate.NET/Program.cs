@@ -206,11 +206,15 @@ namespace SimpleAutoUpdate
 
         private void Unzip(String source, String dest)
         {
+            string thisExeName = new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Name;
             using (ZipArchive archive = ZipFile.OpenRead(source))
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    entry.ExtractToFile(Path.Combine(dest, entry.FullName), true);
+                    if (entry.Name.Equals(thisExeName))
+                        entry.ExtractToFile(Path.Combine(dest, entry.FullName + ".update"), true);
+                    else
+                        entry.ExtractToFile(Path.Combine(dest, entry.FullName), true);
                 }
             }
         }
