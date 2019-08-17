@@ -36,12 +36,19 @@ namespace SimpleAutoUpdate
 
 
         }
+
+        /**
+         * Send error messages to error output and exit
+         */
         private void reportError(string error)
         {
             Console.Error.WriteLine(error);
             Environment.Exit(-1);
         }
 
+        /**
+         * Main function: controls the application flow 
+         */
         private void run(string[] args)
         {
             try
@@ -52,7 +59,7 @@ namespace SimpleAutoUpdate
 
                 if (args.Count() < 2)
                 {
-                    Console.WriteLine("Usage: SimpleAutoUpdate.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])");
+                    Console.WriteLine("Usage: SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])");
                     Environment.Exit(-2);
                 }
                 string currentVersionString = args[0];
@@ -124,6 +131,9 @@ namespace SimpleAutoUpdate
 
         }
 
+        /*
+         * Wait for the given program to exit. Terminates the program if it doesn't. 
+         */
         private void WaitForExit(FileInfo mainProgram)
         {
             Process[] processes = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(mainProgram.Name));
@@ -143,6 +153,9 @@ namespace SimpleAutoUpdate
 
         }
 
+        /*
+         *  Download and parse the update manifest 
+         */
         private UpdateInformations GetUpdateInformations(string updateManifestURL)
         {
             XmlDocument updateInformation = new XmlDocument();
@@ -214,7 +227,9 @@ namespace SimpleAutoUpdate
         }
 
 
-
+        /*
+         * Download the update zip
+         */
         private string DownloadPackage(string url)
         {
             String updateZipPackage = Path.GetTempFileName();
@@ -226,6 +241,9 @@ namespace SimpleAutoUpdate
             return updateZipPackage;
         }
 
+        /*
+         * Unzip the update zip and replace the existing files 
+         */
         private void Unzip(String source, String dest)
         {
             string thisExeName = new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Name;
@@ -241,7 +259,9 @@ namespace SimpleAutoUpdate
             }
         }
 
-
+        /*
+         * Validate the checksum of the update zip 
+         */
         private bool ValidateCheckSum(string refCheckSum, string file)
         {
             string checkSum = null;
