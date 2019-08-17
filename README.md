@@ -17,16 +17,19 @@ SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgra
 * \[updateManifestUrl] = The URL to the update manifest
 * \[pathToMainProgram] = The path to your main exe (to start/stop your application) (optional)
 
+For a code snippet refer to the "Example c# code to invoke the update"-section below.
+
 ## 2. Pack your application together with the SimpleAutoUpdate.NET.exe
 
 ## 3. Upload your package, create and upload the update manifest
 The update manifest is a xml-file with the following format:
 
 ```xml
+<?xml version="1.0" encoding="UTF-8"?>
 <item>
     <version>X.X.X.X/version>
     <url>[URL]</url>
-	  <sha256>[Hash]</sha256>
+    <sha256>[Hash]</sha256>
 </item>
 ```
 
@@ -34,4 +37,39 @@ The update manifest is a xml-file with the following format:
 * url = The http address where the updater can find the update .zip file
 * sha256 = Hash of the .zip file (optional)
 
-## 4. Deploy your applicationxml
+## 4. Deploy your application
+
+# Examples
+
+## Example update manifest
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<item>
+    <version>1.0.0.11</version>
+    <url>https://github.com/BkrBkr/SpectrePatcher/releases/download/1.0.0.11/SpectrePatcher.zip</url>
+    <sha256>09f3fb7df275aff5bfd14ffdc2afbc0ada24e307ef5fbcb2995dcf999423fac9</sha256>
+</item>
+```
+
+## Example c# code to invoke the update
+
+```c#
+Private Sub autoUpdate()
+        Dim exePath As String = System.Reflection.Assembly.GetEntryAssembly().Location
+        Dim workingDir As String = New System.IO.FileInfo(exePath).Directory.FullName
+        Dim version As Version = Assembly.GetExecutingAssembly().GetName().Version
+        Dim p As New Process()
+        Dim updateExe As String = IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe")
+
+        p.StartInfo.FileName = updateExe
+        p.StartInfo.Arguments = String.Format(" ""{0}"" ""{1}"" ""{2}"" ", version.ToString(),         
+	"https://raw.githubusercontent.com/BkrBkr/SpectrePatcher/master/update.xml", exePath)
+        p.Start()
+        p.WaitForExit()
+
+        If IO.File.Exists(IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe.update")) Then
+            IO.File.Delete(updateExe)
+            IO.File.Move(IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe.update"), updateExe)
+        End If
+    End Sub
+```
