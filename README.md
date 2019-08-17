@@ -12,14 +12,16 @@ If you want to update your software you can simply invoke SimpleAutoUpdate.NET.e
 ```console
 SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])
 ```
-\[currentVersion] = The current version nummber of your application. Format: X.X.X.X X=digits e.g. 1.0.0.0
-\[updateManifestUrl] = The URL to the update manifest
-\[pathToMainProgram] = The path to your main exe (to start/stop your application) (optional)
+
+* \[currentVersion] = The current version nummber of your application. Format: X.X.X.X X=digits e.g. 1.0.0.0
+* \[updateManifestUrl] = The URL to the update manifest
+* \[pathToMainProgram] = The path to your main exe (to start/stop your application) (optional)
 
 ## 2. Pack your application together with the SimpleAutoUpdate.NET.exe
 
 ## 3. Upload your package, create and upload the update manifest
 The update manifest is a xml-file with the following format:
+
 ```xml
 <item>
     <version>X.X.X.X/version>
@@ -27,8 +29,9 @@ The update manifest is a xml-file with the following format:
 	  <sha256>[Hash]</sha256>
 </item>
 ```
-version = The version of the update Format: X.X.X.X X=digits e.g. 1.0.0.0
-url = The http address where the updater can find the update .zip file
-sha256 = Hash of the .zip file (optional)
+
+* version = The version of the update Format: X.X.X.X X=digits e.g. 1.0.0.0
+* url = The http address where the updater can find the update .zip file
+* sha256 = Hash of the .zip file (optional)
 
 ## 4. Deploy your applicationxml
