@@ -54,7 +54,7 @@ The update manifest is a xml-file with the following format:
 ## Example c# code to invoke the update
 
 ```csharp
-  private void autoUpdate()
+        private void autoUpdate()
         {
             string exePath = System.Reflection.Assembly.GetEntryAssembly().Location;
             string workingDir = new System.IO.FileInfo(exePath).Directory.FullName;
@@ -66,6 +66,34 @@ The update manifest is a xml-file with the following format:
             p.StartInfo.Arguments = string.Format(" \"{0}\" \"{1}\" \"{2}\" ", version.ToString(), "https://raw.githubusercontent.com/BkrBkr/SpectrePatcher/master/update.xml", exePath);
             p.Start();
             p.WaitForExit();
+
+            if (System.IO.File.Exists(System.IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe.update")))
+            {
+                System.IO.File.Delete(updateExe);
+                System.IO.File.Move(System.IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe.update"), updateExe);
+            }
+        }
+```
+
+## Example c# code to invoke the update with logging
+
+```csharp
+        private void autoUpdate(string logFile)
+        {
+            string exePath = System.Reflection.Assembly.GetEntryAssembly().Location;
+            string workingDir = new System.IO.FileInfo(exePath).Directory.FullName;
+            Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            System.Diagnostics.Process p = new System.Diagnostics.Process();
+            string updateExe = System.IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe");
+
+            p.StartInfo.FileName = "cmd.exe";
+            p.StartInfo.Arguments = string.Format("/C \"\"{0}\" \"{1}\" \"{2}\" \"{3}\" 2>> \"{4}\"\"", updateExe, version.ToString(), "https://raw.githubusercontent.com/BkrBkr/SpectrePatcher/master/update.xml", exePath, logFile);
+
+            p.Start();
+            p.WaitForExit();
+
+            if (p.ExitCode != 0)
+                throw new InvalidOperationException(string.Format("Error during auto update. Error-Code {0}", p.ExitCode));
 
             if (System.IO.File.Exists(System.IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe.update")))
             {
