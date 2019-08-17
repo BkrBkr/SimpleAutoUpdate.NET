@@ -71,5 +71,5 @@ Private Sub autoUpdate()
             IO.File.Delete(updateExe)
             IO.File.Move(IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe.update"), updateExe)
         End If
-    End Sub
+End Sub
 ```
