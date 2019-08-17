@@ -62,7 +62,7 @@ Private Sub autoUpdate()
         Dim updateExe As String = IO.Path.Combine(workingDir, "SimpleAutoUpdate.NET.exe")
 
         p.StartInfo.FileName = updateExe
-        p.StartInfo.Arguments = String.Format(" ""{0}"" ""{1}"" ""{2}"" ", version.ToString(),         "https://raw.githubusercontent.com/BkrBkr/SpectrePatcher/master/update.xml", exePath)
+        p.StartInfo.Arguments = String.Format(" ""{0}"" ""{1}"" ""{2}"" ", version.ToString(), "https://raw.githubusercontent.com/BkrBkr/SpectrePatcher/master/update.xml", exePath)
         p.Start()
         p.WaitForExit()
 
