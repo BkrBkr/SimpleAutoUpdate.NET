@@ -1,13 +1,13 @@
 # SimpleAutoUpdate.NET
-SimpleAutoUpdate.NET is a simple c# program that enables developers to add auto update capabilites to their software without the need to implement a library. SimpleAutoUpdate.NET can download a zip archive containing the update files and replace the existing files with the update. Optionally it can stop and restart your application to perform the update.
+SimpleAutoUpdate.NET is a simple C# program that allows developers to add automatic update functions to their software without having to implement a library. SimpleAutoUpdate.NET can download a zip archive with the update files and replace the existing files with the update. Optionally, it can stop and restart your application to perform the update.
 
 # How it works
-SimpleAutoUpdate.NET checks a given URL for an update manifest. The update manifest contains the version of the update and a download URL. (Optionally a sha256 checksum). If the update is newer than the current application version it downloads the update, stops your application, replaces the application files with the files from the zip archive an restarts your application
+SimpleAutoUpdate.NET checks a given URL for an update manifest. The update manifest contains the version of the update and a download URL. (Optional a sha256 checksum). If the update is newer than the current application version, SimpleAutoUpdate.NET downloads the update, stops your application, replaces the application files with the files from the zip archive, and restarts your application.
 
 # Integrate SimpleAutoUpdate.NET in your application
 
 ## 1. Add the necessary code to your application
-If you want to update your software you can simply invoke SimpleAutoUpdate.NET.exe and pass the necessary parameters:
+If you want to update your software, you can simply call SimpleAutoUpdate.NET.exe and pass the necessary parameters:
 
 ```console
 SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])
@@ -33,7 +33,7 @@ The update manifest is a xml-file with the following format:
 </item>
 ```
 
-* version = The version of the update Format: X.X.X.X X=digits e.g. 1.0.0.0
+* version = The version of the update. Format: X.X.X.X X=digits e.g. 1.0.0.0
 * url = The http address where the updater can find the update .zip file
 * sha256 = Hash of the .zip file (optional)
 
