@@ -17,7 +17,7 @@ SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgra
 * \[updateManifestUrl] = The URL to the update manifest
 * \[pathToMainProgram] = The path to your main exe (to start/stop your application) (optional)
 
-For a code snippet refer to the "Example c# code to invoke the update"-section below.
+For a code snippet refer to the "[Example c# code to invoke the update](#example-c-code-to-invoke-the-update)"-section below.
 
 ## 2. Pack your application together with the SimpleAutoUpdate.NET.exe
 
