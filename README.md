@@ -53,7 +53,7 @@ The update manifest is a xml-file with the following format:
 
 ## Example c# code to invoke the update
 
-```c#
+```csharp
 Private Sub autoUpdate()
         Dim exePath As String = System.Reflection.Assembly.GetEntryAssembly().Location
         Dim workingDir As String = New System.IO.FileInfo(exePath).Directory.FullName
