@@ -55,8 +55,6 @@ namespace SimpleAutoUpdate
             {
                 Boolean restartNeeded = false;
 
-                System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls | System.Net.SecurityProtocolType.Tls11 | System.Net.SecurityProtocolType.Tls12 | System.Net.SecurityProtocolType.Ssl3;
-
                 if (args.Count() < 2)
                 {
                     Console.WriteLine("Usage: SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])");
@@ -109,13 +107,22 @@ namespace SimpleAutoUpdate
                         WaitForExit(mainProgram);
                         restartNeeded = true;
                     }
-                    string updateZipPackage = DownloadPackage(updateInformation.Url);
-                    if (!string.IsNullOrEmpty(updateInformation.Checksum) && !ValidateCheckSum(updateInformation.Checksum,updateZipPackage))
+                    FileInfo updateZipPackage = DownloadPackage(updateInformation.Url);
+                    try
                     {
-                        reportError("Invalid Checksum");
-                        return;
+
+                        if (!string.IsNullOrEmpty(updateInformation.Checksum) && !ValidateCheckSum(updateInformation.Checksum, updateZipPackage))
+                        {
+                            reportError("Invalid Checksum");
+                            return;
+                        }
+                        Unzip(updateZipPackage, new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Directory);
                     }
-                    Unzip(updateZipPackage, new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Directory.FullName);
+                    finally
+                    {
+                        if (updateZipPackage.Exists)
+                            updateZipPackage.Delete();
+                    }
                 }
 
 
@@ -204,20 +211,20 @@ namespace SimpleAutoUpdate
 
             String checkSum = "";
             XmlNode sha256 = root.SelectSingleNode("sha256");
-            if(sha256 != null)
+            if (sha256 != null)
             {
                 checkSum = sha256.InnerText;
             }
 
-            return new UpdateInformations(releaseVersion, downloadUrl, checkSum);
+            return new UpdateInformations(releaseVersion, new Uri(downloadUrl), checkSum);
         }
 
         private class UpdateInformations
         {
-            public string Url { get; }
+            public Uri Url { get; }
             public Version Version { get; }
             public string Checksum { get; }
-            public UpdateInformations(Version version, String url, string checksum)
+            public UpdateInformations(Version version, Uri url, string checksum)
             {
                 this.Version = version;
                 this.Url = url;
@@ -230,7 +237,7 @@ namespace SimpleAutoUpdate
         /*
          * Download the update zip
          */
-        private string DownloadPackage(string url)
+        private FileInfo DownloadPackage(Uri url)
         {
             String updateZipPackage = Path.GetTempFileName();
             using (WebClient client = new WebClient())
@@ -238,23 +245,23 @@ namespace SimpleAutoUpdate
 
                 client.DownloadFile(url, updateZipPackage);
             }
-            return updateZipPackage;
+            return new FileInfo(updateZipPackage);
         }
 
         /*
          * Unzip the update zip and replace the existing files 
          */
-        private void Unzip(String source, String dest)
+        private void Unzip(FileInfo source, DirectoryInfo dest)
         {
             string thisExeName = new FileInfo(System.Reflection.Assembly.GetEntryAssembly().Location).Name;
-            using (ZipArchive archive = ZipFile.OpenRead(source))
+            using (ZipArchive archive = ZipFile.OpenRead(source.FullName))
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     if (entry.Name.Equals(thisExeName))
-                        entry.ExtractToFile(Path.Combine(dest, entry.FullName + ".update"), true);
+                        entry.ExtractToFile(Path.Combine(dest.FullName, entry.FullName + ".update"), true);
                     else
-                        entry.ExtractToFile(Path.Combine(dest, entry.FullName), true);
+                        entry.ExtractToFile(Path.Combine(dest.FullName, entry.FullName), true);
                 }
             }
         }
@@ -262,10 +269,10 @@ namespace SimpleAutoUpdate
         /*
          * Validate the checksum of the update zip 
          */
-        private bool ValidateCheckSum(string refCheckSum, string file)
+        private bool ValidateCheckSum(string refCheckSum, FileInfo file)
         {
             string checkSum = null;
-            using (System.IO.FileStream fileStream = System.IO.File.OpenRead(file))
+            using (System.IO.FileStream fileStream = System.IO.File.OpenRead(file.FullName))
             {
                 using (System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create())
                 {
