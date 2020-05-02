@@ -288,7 +288,7 @@ namespace SimpleAutoUpdate
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (entry.Name.Equals(thisExeName))
+                    if (entry.Name.Equals(thisExeName)||entry.Name.Equals("NDesk.Options.dll"))
                         entry.ExtractToFile(Path.Combine(dest.FullName, entry.FullName + ".update"), true);
                     else
                         entry.ExtractToFile(Path.Combine(dest.FullName, entry.FullName), true);
