@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NDesk.Options;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -45,7 +46,6 @@ namespace SimpleAutoUpdate
             Console.Error.WriteLine(error);
             Environment.Exit(-1);
         }
-
         /**
          * Main function: controls the application flow 
          */
@@ -53,36 +53,54 @@ namespace SimpleAutoUpdate
         {
             try
             {
+              
                 Boolean restartNeeded = false;
 
-                if (args.Count() < 3)
+                string currentVersionString = "";
+                string updateManifestURL ="";
+                string downloadServerPrefix = "";
+                string pathToMainProgram ="";
+                bool hasMainProg = false;
+                OptionSet p = new OptionSet() {
+                    { "currentVersion=", "currentVersion",
+                    v => currentVersionString=v },
+                    { "updateManifestUrl=", "updateManifestUrl",
+                    v => updateManifestURL=v },
+                    { "downloadServerPrefix=", "downloadServerPrefix",
+                    v => downloadServerPrefix=v },
+                    { "pathToMainProgram=", "pathToMainProgram",
+                    v => {hasMainProg=true; pathToMainProgram=v; } }
+                };
+
+                try
                 {
-                    Console.WriteLine("Usage: SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] [downloadServerPrefix] ([pathToMainProgram])");
-                    Environment.Exit(-2);
+                    p.Parse(args);
                 }
-                string currentVersionString = args[0];
+                catch (OptionException)
+                {
+                    reportError("Invalid parameters");
+                    return;
+                }
                 if (string.IsNullOrEmpty(currentVersionString))
                 {
                     reportError("Parameter error:no current version");
                     return;
                 }
-                string updateManifestURL = args[1];
                 if (string.IsNullOrEmpty(currentVersionString))
                 {
                     reportError("Parameter error:no update manifest URL");
                     return;
                 }
-                string downloadServerPrefix = args[2];
+                
                 if (string.IsNullOrEmpty(downloadServerPrefix))
                 {
                     reportError("Parameter error:no downloadServerPrefix");
                     return;
                 }
                 FileInfo mainProgram = null;
-                if (args.Count() > 3)
+                if (hasMainProg)
                 {
-                    string pathToMainProgram = args[3];
-
+                    
                     if (string.IsNullOrEmpty(pathToMainProgram) || !File.Exists(pathToMainProgram))
                     {
 
