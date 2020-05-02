@@ -55,9 +55,9 @@ namespace SimpleAutoUpdate
             {
                 Boolean restartNeeded = false;
 
-                if (args.Count() < 2)
+                if (args.Count() < 3)
                 {
-                    Console.WriteLine("Usage: SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])");
+                    Console.WriteLine("Usage: SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] [downloadServerPrefix] ([pathToMainProgram])");
                     Environment.Exit(-2);
                 }
                 string currentVersionString = args[0];
@@ -72,10 +72,16 @@ namespace SimpleAutoUpdate
                     reportError("Parameter error:no update manifest URL");
                     return;
                 }
-                FileInfo mainProgram = null;
-                if (args.Count() > 2)
+                string downloadServerPrefix = args[2];
+                if (string.IsNullOrEmpty(downloadServerPrefix))
                 {
-                    string pathToMainProgram = args[2];
+                    reportError("Parameter error:no downloadServerPrefix");
+                    return;
+                }
+                FileInfo mainProgram = null;
+                if (args.Count() > 3)
+                {
+                    string pathToMainProgram = args[3];
 
                     if (string.IsNullOrEmpty(pathToMainProgram) || !File.Exists(pathToMainProgram))
                     {
@@ -100,6 +106,12 @@ namespace SimpleAutoUpdate
                     reportError("No update informations found");
                     return;
                 }
+                if (!updateInformation.Url.AbsoluteUri.StartsWith(downloadServerPrefix, true, System.Globalization.CultureInfo.InvariantCulture))
+                {
+                    reportError("Untrusted URL");
+                    return;
+                }
+
                 if (currentVersion < updateInformation.Version)
                 {
                     if (mainProgram != null)
