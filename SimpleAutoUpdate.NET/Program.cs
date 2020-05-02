@@ -1,5 +1,4 @@
-﻿using NDesk.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -46,6 +45,7 @@ namespace SimpleAutoUpdate
             Console.Error.WriteLine(error);
             Environment.Exit(-1);
         }
+
         /**
          * Main function: controls the application flow 
          */
@@ -53,54 +53,30 @@ namespace SimpleAutoUpdate
         {
             try
             {
-              
                 Boolean restartNeeded = false;
 
-                string currentVersionString = "";
-                string updateManifestURL ="";
-                string downloadServerPrefix = "";
-                string pathToMainProgram ="";
-                bool hasMainProg = false;
-                OptionSet p = new OptionSet() {
-                    { "currentVersion=", "currentVersion",
-                    v => currentVersionString=v },
-                    { "updateManifestUrl=", "updateManifestUrl",
-                    v => updateManifestURL=v },
-                    { "downloadServerPrefix=", "downloadServerPrefix",
-                    v => downloadServerPrefix=v },
-                    { "pathToMainProgram=", "pathToMainProgram",
-                    v => {hasMainProg=true; pathToMainProgram=v; } }
-                };
-
-                try
+                if (args.Count() < 2)
                 {
-                    p.Parse(args);
+                    Console.WriteLine("Usage: SimpleAutoUpdate.NET.exe [currentVersion] [updateManifestUrl] ([pathToMainProgram])");
+                    Environment.Exit(-2);
                 }
-                catch (OptionException)
-                {
-                    reportError("Invalid parameters");
-                    return;
-                }
+                string currentVersionString = args[0];
                 if (string.IsNullOrEmpty(currentVersionString))
                 {
                     reportError("Parameter error:no current version");
                     return;
                 }
+                string updateManifestURL = args[1];
                 if (string.IsNullOrEmpty(currentVersionString))
                 {
                     reportError("Parameter error:no update manifest URL");
                     return;
                 }
-                
-                if (string.IsNullOrEmpty(downloadServerPrefix))
-                {
-                    reportError("Parameter error:no downloadServerPrefix");
-                    return;
-                }
                 FileInfo mainProgram = null;
-                if (hasMainProg)
+                if (args.Count() > 2)
                 {
-                    
+                    string pathToMainProgram = args[2];
+
                     if (string.IsNullOrEmpty(pathToMainProgram) || !File.Exists(pathToMainProgram))
                     {
 
@@ -124,12 +100,6 @@ namespace SimpleAutoUpdate
                     reportError("No update informations found");
                     return;
                 }
-                if (!updateInformation.Url.AbsoluteUri.StartsWith(downloadServerPrefix, true, System.Globalization.CultureInfo.InvariantCulture))
-                {
-                    reportError("Untrusted URL");
-                    return;
-                }
-
                 if (currentVersion < updateInformation.Version)
                 {
                     if (mainProgram != null)
@@ -288,7 +258,7 @@ namespace SimpleAutoUpdate
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (entry.Name.Equals(thisExeName)||entry.Name.Equals("NDesk.Options.dll"))
+                    if (entry.Name.Equals(thisExeName))
                         entry.ExtractToFile(Path.Combine(dest.FullName, entry.FullName + ".update"), true);
                     else
                         entry.ExtractToFile(Path.Combine(dest.FullName, entry.FullName), true);
